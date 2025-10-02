@@ -1,6 +1,6 @@
 <a href="https://github.com/GameDev46" title="Go to GitHub repo">
-    <img src="https://img.shields.io/static/v1?label=GameDev46&message=|&color=Green&logo=github&style=for-the-badge&labelColor=1f1f22" alt="GameDev46 - drogic_pro">
-    <img src="https://img.shields.io/badge/Version-0.9.7-green?style=for-the-badge&labelColor=1f1f22&color=Green" alt="GameDev46 - drogic_pro">
+    <img src="https://img.shields.io/static/v1?label=GameDev46&message=|&color=Green&logo=github&style=for-the-badge&labelColor=1f1f22" alt="GameDev46 - Drogic_Pro">
+    <img src="https://img.shields.io/badge/Version-0.9.7-green?style=for-the-badge&labelColor=1f1f22&color=Green" alt="GameDev46 - Drogic_Pro">
 </a>
 
 
@@ -8,21 +8,21 @@
 ![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=CSS3&logoColor=6060ef)
 ![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=JavaScript)
     
-<a href="https://github.com/GameDev46/drogic_pro/stargazers">
-    <img src="https://img.shields.io/github/stars/GameDev46/drogic_pro?style=for-the-badge&labelColor=1f1f22" alt="stars - drogic_pro">
+<a href="https://github.com/GameDev46/Drogic_Pro/stargazers">
+    <img src="https://img.shields.io/github/stars/GameDev46/Drogic_Pro?style=for-the-badge&labelColor=1f1f22" alt="stars - Drogic_Pro">
 </a>
-<a href="https://github.com/GameDev46/drogic_pro/forks">
-    <img src="https://img.shields.io/github/forks/GameDev46/drogic_pro?style=for-the-badge&labelColor=1f1f22" alt="forks - drogic_pro">
+<a href="https://github.com/GameDev46/Drogic_Pro/forks">
+    <img src="https://img.shields.io/github/forks/GameDev46/Drogic_Pro?style=for-the-badge&labelColor=1f1f22" alt="forks - Drogic_Pro">
 </a>
-<a href="https://github.com/GameDev46/drogic_pro/issues">
-    <img src="https://img.shields.io/github/issues/GameDev46/drogic_pro?style=for-the-badge&labelColor=1f1f22&color=blue"/>
+<a href="https://github.com/GameDev46/Drogic_Pro/issues">
+    <img src="https://img.shields.io/github/issues/GameDev46/Drogic_Pro?style=for-the-badge&labelColor=1f1f22&color=blue"/>
  </a>
 
 <br>
 <br>
 
 <div align="left">
-<a href="https://gamedev46.github.io/drogic_pro/drogicPro/">
+<a href="https://gamedev46.github.io/Drogic_Pro/">
     <img src="https://img.shields.io/badge/View_site-GH_Pages-2ea44f?style=for-the-badge&labelColor=1f1f22" alt="View site - GH Pages">
 </a>
 </div>

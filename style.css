@@ -1,0 +1,831 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
+body {
+	background: var(--whiteColour);
+	overflow: hidden;
+	--websiteFont: "Montserrat";
+	--whiteColour: rgb(250, 250, 250);
+	--lightGreyColour: rgb(240, 240, 240);
+	--blackColour: rgb(13, 13, 13);
+	--imageFilter: 0%;
+	--buttonColour: rgba(0, 0, 0, 0.4);
+	touch-action: none;
+	user-select: none;
+	-ms-user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-webkit-touch-callout: none;
+	transition: 0.15s linear;
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+	border: none;
+	outline: none;
+	background: var(--whiteColour);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--buttonColour);
+	border-radius: 20px;
+	transition: 0.1s;
+	cursor: pointer;
+}
+
+.navTop {
+	top: 0;
+	left: 0;
+	position: fixed;
+	background: none;
+	width: 100vw;
+	margin: 0;
+	padding: 0;
+	padding-top: 10px;
+	z-index: 200;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	pointer-events: none;
+}
+
+.navBottom {
+	bottom: 30px;
+	left: 0;
+	position: fixed;
+	background: none;
+	width: 100vw;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	padding-top: 10px;
+	z-index: 200;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	pointer-events: none;
+}
+
+.navColumn {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.navRow {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.navBox {
+	background: var(--lightGreyColour);
+	width: fit-content;
+	height: fit-content;
+	margin: 0;
+	padding: 10px;
+	z-index: 200;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	margin: 3px;
+	outline: 1px solid var(--buttonColour);
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+	pointer-events: all;
+}
+
+.navBox > h1 {
+	width: 140px;
+	margin: 5px;
+	padding: 3px;
+	padding-left: 20px;
+	padding-right: 0;
+	color: var(--blackColour);
+	outline: none;
+	border: none;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 20px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+}
+
+.navBox > img {
+	height: 40px;
+	border: none;
+	border-radius: 3px;
+	margin: 0;
+	outline: none;
+}
+
+.navBox > select {
+	width: 170px;
+	height: 40px;
+	background: var(--whiteColour);
+	color: var(--blackColour);
+	border: 1px solid var(--buttonColour);
+	border-radius: 2px;
+	outline: none;
+	text-align: left;
+	padding-left: 10px;
+	cursor: pointer;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+}
+
+.navBox > input {
+	width: 60px;
+	height: 40px;
+	padding: 0;
+	padding-left: 10px;
+	padding-right: 10px;
+	background: var(--buttonColour);
+	color: white;
+	border-radius: 2px;
+	outline: none;
+	border: none;
+	transition: 0.1s linear;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	text-align: center;
+	margin-left: 10px;
+}
+
+.navBox > button {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	width: 150px;
+	height: 40px;
+	background: var(--buttonColour);
+	color: white;
+	border-radius: 2px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+	transition: 0.1s linear;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	margin-left: 10px;
+}
+
+.navBox > button:hover {
+	background: rgb(130, 160, 250);
+}
+
+.navBox > button > svg {
+	width: 15px;
+	margin-right: 10px;
+	pointer-events: none;
+}
+
+.navBox > #mode-toggle {
+	width: 40px;
+	margin: 0;
+}
+
+.navBox > #mode-toggle > svg {
+	margin: 0;
+}
+
+.navBox > #save-drogic {
+	width: 150px;
+}
+
+.navBox > #zoom-in {
+	width: 40px;
+	margin-left: 0;
+}
+
+.navBox > #zoom-out {
+	width: 40px;
+}
+
+.navBox > #center-screen {
+	width: 40px;
+	margin-left: 0;
+}
+
+.navBox > #center-screen > svg {
+	width: 15px;
+	margin: 0;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+    width: 150px;
+	height: 40px;
+	background: var(--buttonColour);
+	color: white;
+	border-radius: 2px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+	transition: 0.1s linear;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	margin-left: 10px;
+}
+
+.custom-file-upload:hover {
+	background: rgb(130, 160, 250);
+}
+
+.custom-file-upload > svg {
+	width: 15px;
+	margin-right: 10px;
+	pointer-events: none;
+}
+
+@media screen and (max-width: 800px) {
+	.info-pannel:hover + .info-div {
+		transform: translate(-50%, 50px) scale(1);
+}
+}
+
+.logic-gate-holder {
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.logic-gate-holder > .logic-gate {
+	width: 60px;
+	height: 60px;
+	user-select: none;
+}
+
+.logic-gate-holder > .logic-gate > div {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	width: 70px;
+	height: 70px;
+	background: var(--whiteColour);
+	color: rgb(13, 13, 13);
+	top: 100px;
+	left: 10px;
+	z-index: 100;
+	border: 1px solid rgb(90, 90, 90);
+	border-radius: 3px;
+	user-select: none;
+	pointer-events: all;
+	cursor: move;
+	outline-offset: 5px;
+}
+
+.logic-gate-holder > .logic-gate > div:hover {
+	border: 1px solid rgb(60, 60, 60);
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.logic-gate-holder > .logic-gate > div > h2 {
+	pointer-events: none;
+	width: 100%;
+	text-align: center;
+	min-height: fit-content;
+	padding-top: 0px;
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	margin: 0;
+	margin-bottom: 10px;
+}
+
+.logic-gate-holder > .logic-gate > div > img {
+	pointer-events: none;
+	width: 50px;
+	height: 50px;
+	justify-self: center;
+	align-self: center;
+	margin: 0;
+	stroke-width: 2;
+	filter: invert(var(--imageFilter));
+}
+
+.infoBox {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	align-items: center;
+	justify-items: center;
+	top: 0;
+	width: 100%;
+	min-width: 100%;
+	min-height: 80%;
+	height: 100%;
+	border-radius: 2px;
+	pointer-events: none;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.infoBox > .ramEditor {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	align-items: center;
+	justify-items: center;
+	top: 0;
+	width: 100%;
+	min-width: 100%;
+	min-height: 30%;
+	height: 30%;
+	border-radius: 2px;
+	pointer-events: none;
+	overflow-x: hidden;
+	overflow-y: auto;
+	pointer-events: all;
+}
+
+.infoBox > .ramEditor > input {
+	position: relative;
+	width: fit-content;
+	width: 160px;
+	height: 30px;
+	min-height: 30px;
+	background: none;
+	border: 2px solid var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	padding-left: 10px;
+	padding-right: 10px;
+	pointer-events: all;
+	outline: none;
+	margin: 3px;
+}
+
+.infoBox > .ramEditor > button {
+	position: relative;
+	width: fit-content;
+	max-width: 90%;
+	min-width: 90%;
+	height: 30px;
+	min-height: 30px;
+	background: var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border: none;
+	outline: none;
+	margin: 3px;
+	transition: 0.15s;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.infoBox > .ramEditor > button:hover {
+	background: #82A0FA;
+}
+
+.infoBox > .ramData {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	align-items: center;
+	justify-items: center;
+	top: 0;
+	width: 100%;
+	min-width: 100%;
+	min-height: 70%;
+	height: 70%;
+	border-radius: 2px;
+	pointer-events: none;
+	overflow-x: hidden;
+	overflow-y: auto;
+	pointer-events: all;
+}
+
+.infoBox > .ramData > div {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	align-items: center;
+	justify-items: center;
+	width: 180px;
+	min-width: 180px;
+	height: 50px;
+	min-height: 50px;
+	background: none;
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	border: none;
+	outline: none;
+	margin: 3px;
+	pointer-events: none;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	pointer-events: none;
+}
+
+.infoBox > .ramData > div > .ramAdressData {
+	position: relative;
+	width: 80%;
+	max-width: 80%;
+	min-width: 80%;
+	height: 100%;
+	min-height: 100%;
+	background: var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	border: none;
+	outline: none;
+	pointer-events: none;
+}
+
+.infoBox > .ramData > div > .ramRemove {
+	position: relative;
+	width: fit-content;
+	max-width: 30px;
+	min-width: 30px;
+	height: 100%;
+	min-height: 100%;
+	background: var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	margin-left: 5px;
+	border: none;
+	outline: none;
+	transition: 0.15s;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.infoBox > .ramData > div > .ramRemove:hover {
+	background: rgb(255, 69, 69);
+}
+
+.infoBox > .grid {
+	display: grid;
+	grid-template-columns: repeat(8, 36px);
+	grid-template-rows: repeat(8, 36px);
+	gap: 3px;
+	position: absolute;
+	align-items: center;
+	justify-items: center;
+	width: 320px;
+	min-width: 320px;
+	height: 320px;
+	min-height: 320px;
+	border-radius: 2px;
+	pointer-events: none;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	padding-left: 10px;
+}
+
+.infoBox > .grid > button {
+	position: relative;
+	width: fit-content;
+	max-width: 100%;
+	min-width: 100%;
+	height: 100%;
+	min-height: 100%;
+	background: rgb(13, 13, 13);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	padding-bottom: 10px;
+	pointer-events: none;
+	border: none;
+	outline: none;
+	margin: 3px;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.infoBox > button {
+	position: relative;
+	width: fit-content;
+	max-width: 90%;
+	min-width: 90%;
+	height: 50px;
+	min-height: 50px;
+	background: var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	pointer-events: none;
+	border: none;
+	outline: none;
+	margin: 3px;
+	pointer-events: none;
+}
+
+.infoBox > input {
+	position: relative;
+	width: fit-content;
+	width: 110px;
+	height: 30px;
+	min-height: 30px;
+	background: none;
+	border: 2px solid var(--buttonColour);
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	padding: 0;
+	padding-left: 10px;
+	padding-right: 10px;
+	pointer-events: all;
+	outline: none;
+	margin: 3px;
+}
+
+.infoBox > select {
+	width: 90px;
+	height: 40px;
+	background: var(--whiteColour);
+	color: var(--blackColour);
+	border: 1px solid var(--buttonColour);
+	border-radius: 2px;
+	outline: none;
+	text-align: left;
+	padding-left: 10px;
+	cursor: pointer;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.infoBox::-webkit-scrollbar {
+	width: 7px;
+	background: var(--whiteColour);
+	border: none;
+	border-radius: 2px;
+}
+
+.infoBox::-webkit-scrollbar-thumb {
+	width: 7px;
+	background: var(--buttonColour);
+	border: none;
+	border-radius: 2px;
+}
+
+.input, .output {
+	display: block;
+	position: absolute;
+	width: 40px;
+	min-width: 40px;
+	height: 20px;
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 12px;
+	font-weight: 100;
+	letter-spacing: 0.4px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	background: var(--whiteColour);
+	border: 1px solid rgb(90, 90, 90);
+	cursor: pointer;
+	transition: background 0.1s linear;
+	pointer-events: all;
+}
+
+.input:hover {
+	background: rgba(140, 160, 250, 1);
+}
+
+.output:hover {
+	background: var(--whiteColour);
+}
+
+.gateDetails {
+	display: block;
+	position: absolute;
+	width: 50px;
+	min-width: 50px;
+	height: 50px;
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 10px;
+	font-weight: 100;
+	letter-spacing: 0.4px;
+	text-overflow: clip;
+	text-align: center;
+	border-radius: 2px;
+	background: none;
+	border: none;
+	cursor: default;
+	transition: none;
+	pointer-events: none;
+	text-transform: uppercase;
+	transform: translate(-5px, 5px);
+}
+
+.logic-gate-holder > .logic-gate > button {
+	display: block;
+	position: absolute;
+	width: 70px;
+	min-width: 70px;
+	height: 30px;
+	min-height: 30px;
+	background: var(--whiteColour);
+	border: 1px solid rgb(90, 90, 90);
+	color: white;
+	outline: none;
+	border-radius: 2px;
+	cursor: pointer;
+	transition: background 0.1s linear;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	margin-left: 10px;
+	opacity: 0;
+	pointer-events: none;
+	z-Index: 100;
+}
+
+.logic-gate-holder > .logic-gate > button:hover {
+	background: rgb(255, 69, 69);
+}
+
+.logic-gate-holder > .logic-gate > button > svg {
+	color: var(--blackColour);
+	width: 15px;
+	height: 15px;
+	transform: translate(0, 1px);
+	pointer-events: none;
+}
+
+.textBox {
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	width: fit-content;
+	height: 30px;
+	user-select: none;
+	pointer-events: all;
+	text-align: center;
+	padding-top: 0px;
+	margin: 0;
+	background: var(--whiteColour);
+	border: 1px solid rgb(90, 90, 90);
+	border-radius: 3px;
+	left: 0;
+	top: 0;
+}
+
+.textBox > h2 {
+	transform: translateY(-16px);
+	width: fit-content;
+	min-width: 50px;
+	height: 30px;
+	min-height: 30px;
+	padding: 10px;
+	color: var(--blackColour);
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	cursor: text;
+	outline: none;
+	border: none;
+	overflow: hidden;
+	white-space: nowrap;
+	-webkit-user-select: text;
+	-webkit-touch-callout: text;
+	user-select: text;
+}
+
+.textBox > span {
+	display: block;
+	width: 30px;
+	min-width: 30px;
+	height: 30px;
+	border-radius: 0;
+	border-top-left-radius: 2px;
+	border-bottom-left-radius: 2px;
+	background: var(--buttonColour);
+	cursor: move;
+	transition: 0.1s linear;
+}
+
+.textBox > span:hover {
+	background: #82A0FA;
+}
+
+.textBox > span > svg {
+	color: white;
+	width: 15px;
+	height: 15px;
+	transform: translate(0, 7px);
+	pointer-events: none;
+}
+
+.textBox > button {
+	width: 30px;
+	min-width: 30px;
+	height: 30px;
+	min-height: 30px;
+	background: var(--buttonColour);
+	color: white;
+	outline: none;
+	border-radius: 0;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+	border: none;
+	cursor: pointer;
+	transition: 0.1s linear;
+	font-family: var(--websiteFont), sans-serif;
+	font-size: 14px;
+	font-weight: 100;
+	letter-spacing: 0.6px;
+	margin-left: 10px;
+}
+
+.textBox > button:hover {
+	background: rgb(255, 69, 69);
+}
+
+.textBox > button > svg {
+	color: white;
+	width: 15px;
+	height: 15px;
+	transform: translate(0, 1px);
+	pointer-events: none;
+}

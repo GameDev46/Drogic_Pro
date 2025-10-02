@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0">
+
+		<meta name="description" content="Click, drag and run your wierd and wonderful logic gate creations online for free on pc or mobile with Drogic!">
+  	<meta name="keywords" content="logic, gates, science, electronics, engineering, digital">
+  <meta name="author" property="og:author" content="GameDev46">
+
+	<meta name="theme-color" content="#0F0F0F">
+
+	<meta property="og:image" content="/logo.png">
+	<meta property="og:site_name" content="Drogic Pro">
+	<meta itemprop="name" content="Drogic Pro">
+
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@GameDev46">
+	<meta name="twitter:title" content="Experiment with cool and weird logic gates">
+	<meta name="twitter:description" content="Click, drag and run your wierd and wonderful logic gate creations online for free on pc or mobile with Drogic!">
+	<meta name="twitter:image" content="/logo.png">
+		
+    <title>Drogic Pro - Logic Gate Simulator</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+		
+		<link rel="icon" href="logo.png" type="image/png" />
+  </head>
+  <body>
+		
+		<script src="https://unpkg.com/feather-icons"></script> 
+		
+		<nav class="navTop">
+
+			<div class="navRow">
+
+				<div class="navBox">
+					<img src="logo.png" alt="Drogic Logo">
+					<h1>Drogic <i>Pro</i></h1>
+				</div>
+
+				<div class="navBox">
+
+					<select id="gate">
+						<optgroup label="Inputs and Outputs">
+							<option value="input">INPUT</option>
+							<option value="output">OUTPUT</option>
+							<option value="oscillator">OSCILLATOR</option>
+							<option value="decimal">DECIMAL INPUT</option>
+							<option value="screen">SCREEN</option>
+							<option value="keyboard">KEYBOARD</option>
+						</optgroup>
+						<optgroup label="Logic">
+							<option value="buffer">BUFFER Gate</option>
+							<option value="toggle">TOGGLE Gate</option>
+							<option value="not">NOT gate</option>
+							<option value="and">AND gate</option>
+							<option value="nand">NAND gate</option>
+							<option value="or">OR gate</option>
+							<option value="nor">NOR gate</option>
+							<option value="xor">XOR gate</option>
+						</optgroup>
+						<optgroup label="Latches">
+							<option value="latch">LATCH</option>
+							<option value="8BitLatch">8 BIT LATCH</option>
+						</optgroup>
+						<optgroup label="Operations">
+							<option value="delay">DELAY</option>
+							<option value="adder">FULL ADDER</option>
+							<option value="alu">ALU</option>
+						</optgroup>
+						<optgroup label="Storage">
+							<option value="ram">RAM</option>
+						</optgroup>
+					</select>
+
+					<button id="add-gate">Add Node</button>
+
+				</div>
+
+			</div>
+
+			<div class="navBox">
+
+				<button id="mode-toggle"><i data-feather="moon"></i></button>
+
+				<button id="save-drogic"><i data-feather="save"></i>Save Layout</button>
+
+				<label class="custom-file-upload">
+					<input type="file" id="loadFileInput" accept=".txt">
+					<i data-feather="file"></i>Load Layout
+				</label>
+
+			</div>
+			
+		</nav>
+
+		<nav class="navBottom">
+
+			<div class="navRow">
+
+				<div class="navBox">
+					<button id="center-screen"><i data-feather="crosshair"></i></button>
+				</div>
+
+				<div class="navBox">
+					<button id="zoom-in">+</button>
+					<input type="text" id="zoomText" value="100">
+					<button id="zoom-out">-</button>
+				</div>
+
+			</div>
+
+		</nav>
+
+		<div class="logic-gate-holder" id="logic-gate-holder">
+			
+		</div>
+
+		<canvas id="background-canvas"></canvas>
+		
+    <script src="./script.js" defer></script>
+  </body>
+</html>

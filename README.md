@@ -3,9 +3,8 @@
     <img src="https://img.shields.io/badge/Version-0.9.7-green?style=for-the-badge&labelColor=1f1f22&color=Green" alt="GameDev46 - Drogic_Pro">
 </a>
 
-
 ![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=HTML5)
-![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=CSS3&logoColor=6060ef)
+![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=CSS&logoColor=6060ef)
 ![Static Badge](https://img.shields.io/badge/--1f1f22?style=for-the-badge&logo=JavaScript)
     
 <a href="https://github.com/GameDev46/Drogic_Pro/stargazers">
@@ -19,7 +18,6 @@
  </a>
 
 <br>
-<br>
 
 <div align="left">
 <a href="https://gamedev46.github.io/Drogic_Pro/">
@@ -29,20 +27,19 @@
 
 <br>
 
-<p align="left">
-<a href="https://twitter.com/gamedev46" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/twitter.svg" alt="gamedev46" height="30" width="40" /></a>
-<a href="https://www.youtube.com/c/gamedev46" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/youtube.svg" alt="gamedev46" height="30" width="40" /></a>
-</p>
-
 # Drogic Pro
 
-A revamped version of my old logic gate building program with a variety of new features and some much needed ease of use updates
+A revamped version of my [old logic gate building program](https://github.com/GameDev46/logic_gate_sim) with a variety of new features and some much needed ease of use updates
 
 ## Usage
 
-Simply use the dropdown to select the node type and hit the add node button to add it to the workspace. Once added you can move the gate around by clicking down, dragging and dropping it. To connect gates simply drag one of the outputs on the right of the gate and connect it to the input of another gate (left side).
+Simply use the node select dropdown to choose the node type and hit the "Add Node" button to add it to the workspace. Once added you can move the gate around by clicking down, dragging and dropping it.
 
-## Gates
+To connect gates simply drag one of the outputs on the right of the gate and connect it to the input of another gate (left side).
+
+To delete a gate right click on it and then press the delete button that shows up underneath it, this will remove both the gate and any connections to it.
+
+## Nodes
 
 *INPUT* - Click to toggle its output high and low
 
@@ -90,6 +87,7 @@ Simply use the dropdown to select the node type and hit the add node button to a
 
 ## Saving and Loading
 
-- To save your creations simply press the save button on the top right navigation bar and a file will automatically be created and saved to your device.
-- To load your creations simply press the load button and you will be prompted to select a valid text file to load into your workspace
+To save your creations simply press the save button on the top right navigation bar and a file will automatically be created and saved to your device.
+
+To load your creations simply press the load button and you will be prompted to select a valid save file to load into your workspace
 

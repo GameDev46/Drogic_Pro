@@ -139,7 +139,9 @@ gateButton.addEventListener("click", e => {
 
 // Adds the specified logic gate tp the scene - setupData is for loading in gates with preset information
 function addGate(setupData=null) {
-	LogicGate.createGate(gateSelect.value, scroll, setupData);
+	let gateType = (setupData != null) ? setupData.type : gateSelect.value;
+	LogicGate.createGate(gateType, scroll, setupData);
+	// Update the UI icons
 	feather.replace();
 }
 

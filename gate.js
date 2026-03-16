@@ -998,7 +998,6 @@ class ScreenGate extends LogicGate {
         for (let x = 0; x < ScreenGate.SCREEN_SIZE; x++) {
             for (let y = 0; y < ScreenGate.SCREEN_SIZE; y++) {
                 if (this.memory["pixel_" + x + ","+ y] == null) this.memory["pixel_" + x + ","+ y] = false;
-
                 if (clearData) this.memory["pixel_" + x + ","+ y] = false;
 
                 this.infoBox.children[0].children[x + (y * ScreenGate.SCREEN_SIZE)].style.background = "rgb(13, 13, 13)";

@@ -15,20 +15,19 @@ let scroll = {
 	y: 0,
 	zoom: 100
 }
-
+ 
 // Workspace interactions and objects data
 let world = {
 	textBoxes: {},
 	draggedTextbox: -1,
 	uniqueTexboxID: 0,
-	focusedWired: -1,
+	focusedWired: null,
 	undoList: [],
 	maxTickRate: 60,
 }
 
 // Records whether keys are currently pressed
 document.addEventListener("keydown", e => {
-
 	if (LogicGate.KEYBOARD[e.key.toUpperCase()]) return;
 	LogicGate.KEYBOARD[e.key.toUpperCase()] = true;
 
@@ -95,18 +94,23 @@ const ctx = canvas.getContext("2d");
 window.addEventListener("mousemove", e => {
 	if (LogicGate.DRAGGED_GATE == null) return;
 
-	updateGateLocation(LogicGate.DRAGGED_GATE, {
+	const draggedGate = LogicGate.getGateFromId(LogicGate.DRAGGED_GATE);
+
+	const newLocation = {
 		x: -( e.pageX * (100 / scroll.zoom) ) + scroll.x + 30,
 		y: -( e.pageY * (100 / scroll.zoom) ) + scroll.y + 30
-	});
+	}
 
+	updateGateLocation(draggedGate, newLocation);
 	drawWiresToScreen();
 });
 
 window.addEventListener("mouseup", e => {
 	if (LogicGate.DRAGGED_GATE == null) return;
 
-	checkToToggleInput(LogicGate.DRAGGED_GATE, e);
+	const draggedGate = LogicGate.getGateFromId(LogicGate.DRAGGED_GATE);
+
+	checkToToggleInput(draggedGate);
 	LogicGate.DRAGGED_GATE = null;
 
 	drawWiresToScreen();
@@ -115,18 +119,23 @@ window.addEventListener("mouseup", e => {
 window.addEventListener("touchmove", e => {
 	if (LogicGate.DRAGGED_GATE == null) return;
 
-	updateGateLocation(LogicGate.DRAGGED_GATE, {
+	const draggedGate = LogicGate.getGateFromId(LogicGate.DRAGGED_GATE);
+
+	const newLocation = {
 		x: -( e.touches[0].pageX * (100 / scroll.zoom) ) + scroll.x,
 		y: -( e.touches[0].pageY * (100 / scroll.zoom) ) + scroll.y
-	});
+	}
 
+	updateGateLocation(draggedGate, newLocation);
 	drawWiresToScreen();
 });
 
 window.addEventListener("touchend", e => {
 	if (LogicGate.DRAGGED_GATE == null) return;
 
-	checkToToggleInput(LogicGate.DRAGGED_GATE, e.changedTouches[0]);
+	const draggedGate = LogicGate.getGateFromId(LogicGate.DRAGGED_GATE);
+
+	checkToToggleInput(draggedGate);
 	LogicGate.DRAGGED_GATE = null;
 
 	drawWiresToScreen();
@@ -145,32 +154,27 @@ function addGate(setupData=null) {
 	feather.replace();
 }
 
-function updateGateLocation(gateID, worldPosition) {
+function updateGateLocation(gate, worldPosition) {
+	const screenPosition = {
+		x: scroll.x - worldPosition.x,
+		y: scroll.y - worldPosition.y
+	};
 
-	let gateX = scroll.x - worldPosition.x;
-	let gateY = scroll.y - worldPosition.y;
-
-	let screenPosition = {
-		"x": gateX,
-		"y": gateY
-	}
-
-	LogicGate.GATES[gateID].setGatePosition(worldPosition, screenPosition);
+	gate.setGatePosition(worldPosition, screenPosition);
 }
 
-function checkToToggleInput(draggedGateID, e) {
-	let gateName = draggedGateID;
-	LogicGate.GATES[gateName].gateHTMLElement.style.zIndex = "0";
+function checkToToggleInput(gate) {
+	gate.gateHTMLElement.style.zIndex = "0";
 
 	if (!LogicGate.MOUSE_MOVED_DURING_DRAG) {
-		if (LogicGate.GATES[gateName].type == "input") {
+		if (gate.type == "input") {
 
 			// Toggle the input
-			LogicGate.GATES[gateName].run();
+			gate.run();
 			
 			// Set the input background colour
-			LogicGate.GATES[gateName].gateHTMLElement.style.background = "rgb(130, 160, 250)";
-			if (!LogicGate.GATES[gateName].output[0]) LogicGate.GATES[gateName].gateHTMLElement.style.background = "var(--whiteColour)";
+			gate.gateHTMLElement.style.background = "rgb(130, 160, 250)";
+			if (!gate.output[0]) gate.gateHTMLElement.style.background = "var(--whiteColour)";
 
 			websiteAudio.switch();
 		}
@@ -189,96 +193,95 @@ window.addEventListener("touchmove", e => {
 	checkForWireInteraction(e.changedTouches[0]);
 })
 
+window.addEventListener("mousedown", e => {
+	if (world.focusedWired == null) return;
+	if (e.button != 1) return;
+
+	// Delete wire
+	world.focusedWired.gate.removeConnectionByID(world.focusedWired.gateInputId);
+	checkForWireInteraction(e);
+})
+
+window.addEventListener("touchstart", e => {
+	if (world.focusedWired == null) return;
+
+	// Delete wire
+	world.focusedWired.gate.removeConnectionByID(world.focusedWired.gateInputId);
+	checkForWireInteraction(e.touches[0]);
+})
+
 function checkForWireInteraction(e) {
-	world.focusedWired = -1;
+	let mousePos = { x: e.pageX, y: e.pageY };
 	
-	for (const item in LogicGate.GATES) {
-		for (let i = 0; i < LogicGate.GATES[item].forwardConnections.length; i++) {
-			if (isPointOnWire(LogicGate.GATES[item].forwardConnections[i], item, { "x": e.pageX, "y": e.pageY })) {
-				world.focusedWired = [LogicGate.GATES[item].forwardConnections[i], i, item];
+	world.focusedWired = null;
+	
+	for (const gateId in LogicGate.GATES) {
+		const currentGate = LogicGate.getGateFromId(gateId);
+		
+		for (let i = 0; i < currentGate.forwardConnections.length; i++) {
+			if (isPointOnWire(currentGate.forwardConnections[i], currentGate, mousePos)) {
+				// Get the gate's connected gate
+				const connectionGate = LogicGate.getGateFromId(currentGate.forwardConnections[i].gateId);
+
+				world.focusedWired = {
+					gate: currentGate,
+					gateId: currentGate.gateId,
+					connectionGate: connectionGate,
+					connectionGateId: connectionGate.gateId,
+					gateInputId: i
+				}
 			}
 		}
 	}
 }
 
-window.addEventListener("mousedown", e => {
-	if (world.focusedWired == -1) return;
+function isPointOnWire(connection, gate, point) {
+	let outputLeft = gate.outputElements[connection.outputId].style.left;
+	let outputTop = gate.outputElements[connection.outputId].style.top;
 
-	if (e.button != 1) return;
-
-	// Delete wire
-	LogicGate.GATES[world.focusedWired[2]].removeConnectionByID(world.focusedWired[1]);
-	checkForWireInteraction(e);
-})
-
-window.addEventListener("touchstart", e => {
-	if (world.focusedWired == -1) return;
-
-	// Delete wire
-	LogicGate.GATES[world.focusedWired[2]].removeConnectionByID(world.focusedWired[1]);
-	checkForWireInteraction(e.touches[0]);
-})
-
-function isPointOnWire(connection, gateKey, point) {
-
-	let inputID = connection.inputID;
-	let gateID = connection.gateID;
-	let outputID = connection.outputID;
-
-	let outputLeft = LogicGate.GATES[gateKey].outputElements[outputID].style.left
-	let outputTop = LogicGate.GATES[gateKey].outputElements[outputID].style.top
-
-	let startPos = {
+	let start = {
 		x: Number(outputLeft.substring(0, outputLeft.length - 2)),
 		y: Number(outputTop.substring(0, outputTop.length - 2))
 	}
 
-	let inputLeft = LogicGate.GATES[gateID].inputElements[inputID].style.left
-	let inputTop = LogicGate.GATES[gateID].inputElements[inputID].style.top
+	let inputLeft = LogicGate.getGateFromId(connection.gateId).inputElements[connection.inputId].style.left;
+	let inputTop = LogicGate.getGateFromId(connection.gateId).inputElements[connection.inputId].style.top;
 
-	let endPos = {
+	let end = {
 		x: Number(inputLeft.substring(0, inputLeft.length - 2)),
 		y: Number(inputTop.substring(0, inputTop.length - 2))
 	}
 
 	const distanceThreshold = 10 * (scroll.zoom / 100);
 
-	const x1 = startPos.x;
-	const y1 = startPos.y;
-
-	const x2 = endPos.x;
-	const y2 = endPos.y;
-
-	const px = point.x;
-	const py = point.y;
-
 	// Calculate the square of the the line length
-	const lineLengthSquared = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+	const lineLengthSqur = (end.x - start.x)**2 + (end.y - start.y)**2;
 
 	// If the line length is zero (i.e., start and end points are the same), compare with the distance to that single point
-	if (lineLengthSquared === 0) {
-	  const distToStart = Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
-	  return distToStart <= distanceThreshold;
+	if (lineLengthSqur === 0) {
+		const distToStart = Math.sqrt((point.x - start.x)**2 + (point.y - start.y)**2);
+		return distToStart <= distanceThreshold;
 	}
 
-	let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / lineLengthSquared;
+	let t = ((point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y)) / lineLengthSqur;
 
-	// Clamp t to the range [0, 1] to ensure the projection lies within the line segment
+	// Clamp t to the range [0, 1] - prevents t from extending past the end of the line
 	t = Math.max(0, Math.min(1, t));
 
 	// Find the projection point on the line segment
-	const projectionX = x1 + t * (x2 - x1);
-	const projectionY = y1 + t * (y2 - y1);
+	const projection ={
+		"x": start.x + t * (end.x - start.x),
+		"y": start.y + t * (end.y - start.y)
+	};
 
 	// Calculate the distance from point `P` to the projection
-	const distanceToLine = Math.sqrt((px - projectionX) ** 2 + (py - projectionY) ** 2);
+	const pointToLineDist = Math.sqrt((point.x - projection.x)**2 + (point.y - projection.y)**2);
 
 	// Check if the distance is less than or equal to the threshold
-	return distanceToLine <= distanceThreshold;
+	return pointToLineDist <= distanceThreshold;
 }
 
 // Canvas and wires
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -301,24 +304,21 @@ function drawWiresToScreen() {
 	drawGridToBackground();
 
 	for (const gateKey in LogicGate.GATES) {
+		const gate = LogicGate.getGateFromId(gateKey);
 
-		for (let i = 0; i < LogicGate.GATES[gateKey].forwardConnections.length; i++) {
+		for (let i = 0; i < gate.forwardConnections.length; i++) {
+			const connection = gate.forwardConnections[i];
 
-			let connection = LogicGate.GATES[gateKey].forwardConnections[i];
-			let inputID = connection.inputID;
-			let gateID = connection.gateID;
-			let outputID = connection.outputID;
-
-			let outputLeft = LogicGate.GATES[gateKey].outputElements[outputID].style.left
-			let outputTop = LogicGate.GATES[gateKey].outputElements[outputID].style.top
+			let outputLeft = gate.outputElements[connection.outputId].style.left;
+			let outputTop = gate.outputElements[connection.outputId].style.top;
 
 			let startPos = {
 				x: Number(outputLeft.substring(0, outputLeft.length - 2)),
 				y: Number(outputTop.substring(0, outputTop.length - 2))
 			}
 
-			let inputLeft = LogicGate.GATES[gateID].inputElements[inputID].style.left
-			let inputTop = LogicGate.GATES[gateID].inputElements[inputID].style.top
+			let inputLeft = LogicGate.getGateFromId(connection.gateId).inputElements[connection.inputId].style.left;
+			let inputTop = LogicGate.getGateFromId(connection.gateId).inputElements[connection.inputId].style.top;
 
 			let endPos = {
 				x: Number(inputLeft.substring(0, inputLeft.length - 2)),
@@ -327,18 +327,21 @@ function drawWiresToScreen() {
 
 			// Check if wire is focused
 			let isFocused = false;
-			if (world.focusedWired[0] == LogicGate.GATES[gateKey].forwardConnections[i]) isFocused = true;
 
-			drawWire(startPos, endPos, LogicGate.GATES[gateKey].output[outputID], isFocused);
+			if (world.focusedWired != null) {
+				if (world.focusedWired.gateId == gate.gateId) {
+					if (world.focusedWired.connectionGateId == connection.gateId) isFocused = true;
+				}
+			}
 
+			drawWire(startPos, endPos, gate.output[connection.outputId], isFocused);
 		}
 	}
 }
 
 function drawMouseDragWire(e, gateName, selectedOutput) {
-
-	let outputLeft = LogicGate.GATES[gateName].outputElements[selectedOutput].style.left
-	let outputTop = LogicGate.GATES[gateName].outputElements[selectedOutput].style.top
+	let outputLeft = LogicGate.getGateFromId(gateName).outputElements[selectedOutput].style.left
+	let outputTop = LogicGate.getGateFromId(gateName).outputElements[selectedOutput].style.top
 
 	let startPos = {
 		x: Number(outputLeft.substring(0, outputLeft.length - 2)),
@@ -354,7 +357,6 @@ function drawMouseDragWire(e, gateName, selectedOutput) {
 }
 
 function drawWire(obj1, obj2, isActive, isFocused=false) {
-		
 	ctx.lineCap = 'round';
 	ctx.lineWidth = lineWidth * (scroll.zoom / 100);
 	ctx.strokeStyle = strokeColour;
@@ -369,10 +371,7 @@ function drawWire(obj1, obj2, isActive, isFocused=false) {
 }
 
 function drawGridToBackground() {
-
 	let squareColour = "#FFFFFF07";
-
-	squareColour = "#FFFFFF07";
 	if (mode == "light") squareColour = "#00000011";
 
 	ctx.lineCap = 'round';
@@ -405,7 +404,7 @@ window.addEventListener("mousemove", e => {
 	drawWiresToScreen();
 
 	if (LogicGate.MOUSE_WIRE_CONNECTION != null) {
-		drawMouseDragWire(e, LogicGate.MOUSE_WIRE_CONNECTION[0], LogicGate.MOUSE_WIRE_CONNECTION[1]);
+		drawMouseDragWire(e, LogicGate.MOUSE_WIRE_CONNECTION.gateId, LogicGate.MOUSE_WIRE_CONNECTION.outputId);
 
 		document.body.style.cursor = "grabbing";
 		canvas.style.cursor = "grabbing";
@@ -419,7 +418,9 @@ window.addEventListener("mousemove", e => {
 window.addEventListener("touchmove", e => {
 	drawWiresToScreen();
 
-	if (LogicGate.MOUSE_WIRE_CONNECTION != null) drawMouseDragWire(e.touches[0], LogicGate.MOUSE_WIRE_CONNECTION[0], LogicGate.MOUSE_WIRE_CONNECTION[1]);
+	if (LogicGate.MOUSE_WIRE_CONNECTION != null) {
+		drawMouseDragWire(e.touches[0], LogicGate.MOUSE_WIRE_CONNECTION.gateId, LogicGate.MOUSE_WIRE_CONNECTION.outputId);
+	}
 })
 
 window.addEventListener("mouseup", e => {
@@ -531,12 +532,12 @@ function addTextBox(buttonEntered, e, textboxText="Click to edit") {
 		})
 		
 		// Position textbox in world
-		textBox.style.left = e.pageX + "px";
-		textBox.style.top = e.pageY + "px";
+		textBox.style.left = e.pageX + "point.x";
+		textBox.style.top = e.pageY + "point.x";
 
 		if (e["global"]) {
-			textBox.style.left = (scroll.x - e.pageX) + "px";
-			textBox.style.top = (scroll.y - e.pageY) + "px";
+			textBox.style.left = (scroll.x - e.pageX) + "point.x";
+			textBox.style.top = (scroll.y - e.pageY) + "point.x";
 		}
 
 		textBox.appendChild(textBoxDrag);
@@ -579,8 +580,8 @@ function addTextBox(buttonEntered, e, textboxText="Click to edit") {
 			let newYPos = -e.pageY + scroll.y + 15;
 
 			let textItem = world.textBoxes["texbox" + world.draggedTextbox.toString()]
-			textItem.element.style.left = (scroll.x - newXPos) + "px";
-			textItem.element.style.top = (scroll.y - newYPos) + "px";
+			textItem.element.style.left = (scroll.x - newXPos) + "point.x";
+			textItem.element.style.top = (scroll.y - newYPos) + "point.x";
 
 			world.textBoxes["texbox" + world.draggedTextbox.toString()].x = newXPos;
 			world.textBoxes["texbox" + world.draggedTextbox.toString()].y = newYPos;
@@ -605,8 +606,8 @@ function addTextBox(buttonEntered, e, textboxText="Click to edit") {
 			let newYPos = -e.changedTouches[0].pageY + scroll.y + 10;
 
 			let textItem = world.textBoxes["texbox" + world.draggedTextbox.toString()]
-			textItem.element.style.left = (scroll.x - newXPos) + "px";
-			textItem.element.style.top = (scroll.y - newYPos) + "px";
+			textItem.element.style.left = (scroll.x - newXPos) + "point.x";
+			textItem.element.style.top = (scroll.y - newYPos) + "point.x";
 
 			world.textBoxes["texbox" + world.draggedTextbox.toString()].x = newXPos;
 			world.textBoxes["texbox" + world.draggedTextbox.toString()].y = newYPos;
@@ -676,12 +677,12 @@ function moveEditorByDragging(e) {
 function updateScreenPosition() {
 
 	// Update the position of all the logic gates
-	for (const gateKey in LogicGate.GATES) {
-		let item = LogicGate.GATES[gateKey];
+	for (const gateId in LogicGate.GATES) {
+		const gate = LogicGate.getGateFromId(gateId);
 
-		updateGateLocation(gateKey, {
-			x: item.x,
-			y: item.y
+		updateGateLocation(gate, {
+			x: gate.x,
+			y: gate.y
 		});
 	}
 
@@ -692,8 +693,8 @@ function updateScreenPosition() {
 		let newXLocation = scroll.x - item.x;
 		let newYLocation = scroll.y - item.y;
 
-		item.element.style.left = newXLocation + "px";	
-		item.element.style.top = newYLocation + "px";
+		item.element.style.left = newXLocation + "point.x";	
+		item.element.style.top = newYLocation + "point.x";
 	}
 
 	scroll.hasBeenDragged = true;
@@ -719,7 +720,6 @@ document.addEventListener("scroll", e => {
 })
 
 function changeWorldZoom(newZoom) {
-
 	scroll.zoom = Math.max(10, newZoom);
 	document.getElementById("zoomText").value = scroll.zoom;
 
@@ -728,14 +728,13 @@ function changeWorldZoom(newZoom) {
 
 // Update center controls
 document.getElementById("center-screen").addEventListener("click", e => {
-	
 	let averageX = 0;
 	let averageY = 0;
 	let total = 0;
 
-	for (const itemKey in LogicGate.GATES) {
-		averageX += LogicGate.GATES[itemKey].x;
-		averageY += LogicGate.GATES[itemKey].y;
+	for (const gateKey in LogicGate.GATES) {
+		averageX += LogicGate.getGateFromId(gateKey).x;
+		averageY += LogicGate.getGateFromId(gateKey).y;
 		total += 1;
 	}
 
@@ -762,30 +761,21 @@ window.addEventListener("beforeunload", e => {
 
 // Update clocks
 function updateAllClocks() {
-
-	for (let item in LogicGate.GATES) {
-
-		if (LogicGate.GATES[item].type == "oscillator") {
-			//websiteAudio.switch();
-
-			LogicGate.GATES[item].run()
-			
-			//LogicGate.GATES[item].gateHTMLElement.style.background = "rgba(227,140,225,1)";
-			//if (!LogicGate.GATES[item].output[0]) LogicGate.GATES[item].gateHTMLElement.style.background = "var(--whiteColour)";
-		}
-		
+	for (let gateKey in LogicGate.GATES) {
+		const gate = LogicGate.getGateFromId(gateKey);
+		if (gate.type == "oscillator") gate.run()	
 	}
 
 	drawWiresToScreen();
 }
 
-let clockInterval = setInterval(updateAllClocks, 1000 / world.maxTickRate);
+const clockInterval = setInterval(updateAllClocks, 1000 / world.maxTickRate);
 
 // Load gates
 
-let urlParams = new URLSearchParams(window.location.search);
-let gateCode = urlParams.get('code');
-let textBoxCode = urlParams.get('textBox');
+//const urlParams = new URLSearchParams(window.location.search);
+//const gateCode = urlParams.get('code');
+//const textBoxCode = urlParams.get('textBox');
 
 // Create a save file
 
@@ -794,22 +784,24 @@ document.getElementById("save-drogic").addEventListener("click", e => {
 	let filteredGates = {}
 
 	for (const itemKey in LogicGate.GATES) {
+		const gate = LogicGate.getGateFromId(itemKey);
+
 		let filteredGateObj = {
-			type: LogicGate.GATES[itemKey].type,
-			id: LogicGate.GATES[itemKey].gateId,
-			connections: LogicGate.GATES[itemKey].forwardConnections,
-			backConnections: LogicGate.GATES[itemKey].backConnections,
-			maxInputs: LogicGate.GATES[itemKey].maxInputs,
-			maxOutputs: LogicGate.GATES[itemKey].maxOutputs,
-			inputs: LogicGate.GATES[itemKey].inputs,
-			inputTaken: LogicGate.GATES[itemKey].inputTaken,
-			output: LogicGate.GATES[itemKey].output,
-			outputTaken: LogicGate.GATES[itemKey].outputTaken,
-			toggleOn: LogicGate.GATES[itemKey].toggleOn,
-			inputOn: LogicGate.GATES[itemKey].inputOn,
-			ramMemory: LogicGate.GATES[itemKey].memory,
-			x: LogicGate.GATES[itemKey].x,
-			y: LogicGate.GATES[itemKey].y
+			type: gate.type,
+			id: gate.gateId,
+			connections: gate.forwardConnections,
+			backConnections: gate.backConnections,
+			maxInputs: gate.maxInputs,
+			maxOutputs: gate.maxOutputs,
+			inputs: gate.inputs,
+			inputTaken: gate.inputTaken,
+			output: gate.output,
+			outputTaken: gate.outputTaken,
+			toggleOn: gate.toggleOn,
+			inputOn: gate.inputOn,
+			ramMemory: gate.memory,
+			x: gate.x,
+			y: gate.y
 		}
 
 		filteredGates[itemKey] = filteredGateObj
@@ -881,7 +873,7 @@ function loadSaveData(savedJSON) {
 	}
 
 	for (const itemKey in LogicGate.GATES) {
-		document.getElementById("logic-gate-holder").removeChild( LogicGate.GATES[itemKey].gateHTMLElement.parentElement );
+		document.getElementById("logic-gate-holder").removeChild( LogicGate.getGateFromId(itemKey).gateHTMLElement.parentElement );
 	}
 
 	// Clear world
@@ -889,10 +881,13 @@ function loadSaveData(savedJSON) {
 		textBoxes: {},
 		draggedTextbox: -1,
 		uniqueTexboxID: 0,
-		focusedWired: -1,
+		focusedWired: null,
 		undoList: [],
 		maxTickRate: 60,
 	}
+
+	// Clear the GATES object
+    LogicGate.GATES = {};
 
 	for (const itemKey in tempWorld.textBoxes) {
 		addTextBox(2, { pageX: tempWorld.textBoxes[itemKey].x, pageY: tempWorld.textBoxes[itemKey].y, global: true }, tempWorld.textBoxes[itemKey].text);
@@ -905,15 +900,15 @@ function loadSaveData(savedJSON) {
 	// Load world
 	world.draggedTextbox = -1;
 	world.uniqueTexboxID = tempWorld.uniqueTexboxID;
+	world.focusedWired = null;
+	world.undoList = tempWorld.undoList;
+
+	LogicGate.MOUSE_MOVED_DURING_DRAG = false;
+	LogicGate.DRAGGED_TEXTBOX = null;
 	LogicGate.DRAGGED_GATE = null;
 	LogicGate.GATE_ID = tempWorld.uniqueGateId;
 	LogicGate.MOUSE_WIRE_CONNECTION = null;
-	world.focusedWired = -1;
-	world.undoList = tempWorld.undoList;
 
 	// Pulse gates
-	for (const itemKey in LogicGate.GATES) {
-		LogicGate.GATES[itemKey].run(true);
-	}
-
+	for (const itemKey in LogicGate.GATES) LogicGate.getGateFromId(itemKey).run(true);
 }

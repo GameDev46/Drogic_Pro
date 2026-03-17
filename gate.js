@@ -14,7 +14,7 @@ class LogicGate {
     type;   // The gate's type (used for saving)
 
     x = 0;  // The gate's global X position
-	y = 0;  // The gate's global Y position
+    y = 0;  // The gate's global Y position
 
     inputs = [];							    // The state of each input (true or false)
     inputNames = ["Bit 1", "Bit 2", "Carry"];	// The name of each input
@@ -58,7 +58,7 @@ class LogicGate {
         this.gateId = gateId;
 
         this.x = -10 + position.x;
-	    this.y = -100 + position.y;
+        this.y = -100 + position.y;
 
         this.gateHTMLElement.style.left = (position.x - this.x) + "px";
         this.gateHTMLElement.style.top = (position.y - this.y) + "px";
@@ -71,8 +71,6 @@ class LogicGate {
 
         if (setupData != null) {
             this.gateId = setupData.id;
-            this.forwardConnections = setupData.connections;
-            this.backConnections = setupData.backConnections;
             this.maxInputs = setupData.maxInputs;
             this.maxOutputs = setupData.maxOutputs;
             this.inputs = setupData.inputs;
@@ -87,6 +85,33 @@ class LogicGate {
             // Update gate position
             this.gateHTMLElement.style.left = setupData.x + "px";
             this.gateHTMLElement.style.top = setupData.y + "px";
+
+            // To handle old save files (which used ID instead of Id suffixes)
+            this.forwardConnections = [];
+
+            for (let i = 0; i < setupData.connections.length; i++) {
+                // Setup connection
+                let newConnection = {
+                    inputId: setupData.connections[i].inputId || setupData.connections[i].inputID,
+                    outputId: setupData.connections[i].outputId || setupData.connections[i].outputID,
+                    gateId: setupData.connections[i].gateId || setupData.connections[i].gateID
+                }
+
+                this.forwardConnections.push(newConnection);
+            }
+
+            this.backConnections = [];
+
+            for (let i = 0; i < setupData.backConnections.length; i++) {
+                // Setup connection
+                let newConnection = {
+                    inputId: setupData.backConnections[i].inputId || setupData.backConnections[i].inputID,
+                    outputId: setupData.backConnections[i].outputId || setupData.backConnections[i].outputID,
+                    gateId: setupData.backConnections[i].gateId || setupData.backConnections[i].gateID
+                }
+
+                this.backConnections.push(newConnection);
+            }
         }
 
         this.setupIO();
@@ -144,12 +169,22 @@ class LogicGate {
             case "8BitLatch":   return new ByteLatchGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "decimal":     return new DecimalInputGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "keyboard":    return new KeyboardInputGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
+            case "delay":       return new DelayGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "oscillator":  return new OscillatorGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "screen":      return new ScreenGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "alu":         return new ALUGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             case "ram":         return new RAMGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
             default:            return new InputGate(gateType, position, newGateDiv, LogicGate.GATE_ID++, setupData);
         }
+    }
+
+    static getGateFromId(id) {
+        // Determine whether the id is just a number of in the format "gate#"
+        if (typeof id != "number") {
+            if (id.substring(0, 4) == "gate") return LogicGate.GATES[id];
+        }
+        
+        return LogicGate.GATES["gate" + id];
     }
 
     setupGateInteractions() {
@@ -206,39 +241,45 @@ class LogicGate {
                 newGateInput.classList.add("input");
 
                 newGateInput.addEventListener("mouseup", e => {
-                    if (!LogicGate.MOUSE_WIRE_CONNECTION) return;
+                    if (LogicGate.MOUSE_WIRE_CONNECTION == null) return;
 
                     // Connect new gate
                     let newConnection = {
-                        inputID: Number(e.target.id.split("|")[2]),
-                        outputID: LogicGate.MOUSE_WIRE_CONNECTION[1],
-                        gateID: "gate" + e.target.id.split("|")[0]
+                        inputId: Number(e.target.id.split("|")[2]),
+                        outputId: LogicGate.MOUSE_WIRE_CONNECTION.outputId,
+                        gateId: Number(e.target.id.split("|")[0])
                     }
 
-                    if (LogicGate.GATES[newConnection.gateID].inputTaken[newConnection.inputID]) return;
+                    const forwardGate = LogicGate.getGateFromId(newConnection.gateId);
+                    if (forwardGate.inputTaken[newConnection.inputId]) return;
 
-                    LogicGate.GATES[LogicGate.MOUSE_WIRE_CONNECTION[0]].forwardConnections.push(newConnection);
-                    LogicGate.GATES[LogicGate.MOUSE_WIRE_CONNECTION[0]].run(true);
+                    const gate = LogicGate.getGateFromId(LogicGate.MOUSE_WIRE_CONNECTION.gateId);
+                    gate.forwardConnections.push(newConnection);
+                    gate.run(true);
+
                     // Claim connection
-                    LogicGate.GATES[newConnection.gateID].inputTaken[newConnection.inputID] = true;
+                    forwardGate.inputTaken[newConnection.inputId] = true;
                 })
 
                 newGateInput.addEventListener("touchend", e => {
-                    if (!LogicGate.MOUSE_WIRE_CONNECTION) return;
+                    if (LogicGate.MOUSE_WIRE_CONNECTION == null) return;
 
                     // Connect new gate
                     let newConnection = {
-                        inputID: Number(e.changedTouches[0].target.id.split("|")[2]),
-                        outputID: LogicGate.MOUSE_WIRE_CONNECTION[1],
-                        gateID: "gate" + e.changedTouches[0].target.id.split("|")[0]
+                        inputId: Number(e.changedTouches[0].target.id.split("|")[2]),
+                        outputId: LogicGate.MOUSE_WIRE_CONNECTION.outputId,
+                        gateId: Number(e.changedTouches[0].target.id.split("|")[0])
                     }
 
-                    if (LogicGate.GATES[newConnection.gateID].inputTaken[newConnection.inputID]) return;
+                    const forwardGate = LogicGate.getGateFromId(newConnection.gateId);
+                    if (forwardGate.inputTaken[newConnection.inputId]) return;
 
-                    LogicGate.GATES[LogicGate.MOUSE_WIRE_CONNECTION[0]].forwardConnections.push(newConnection);
-                    LogicGate.GATES[LogicGate.MOUSE_WIRE_CONNECTION[0]].run(true);
+                    const gate = LogicGate.getGateFromId(LogicGate.MOUSE_WIRE_CONNECTION.gateId);
+                    gate.forwardConnections.push(newConnection);
+                    gate.run(true);
+
                     // Claim connection
-                    LogicGate.GATES[newConnection.gateID].inputTaken[newConnection.inputID] = true;
+                    forwardGate.inputTaken[newConnection.inputId] = true;
                 })
 
             }
@@ -260,11 +301,17 @@ class LogicGate {
                 newGateOutput.classList.add("output");
 
                 newGateOutput.addEventListener("mousedown", e => {
-                    LogicGate.MOUSE_WIRE_CONNECTION = ["gate" + (e.target.id.split("|")[0]), Number((e.target.id.split("|")[2]))];	
+                    LogicGate.MOUSE_WIRE_CONNECTION = {
+                        gateId: Number(e.target.id.split("|")[0]),
+                        outputId: Number(e.target.id.split("|")[2])
+                    }
                 })
         
                 newGateOutput.addEventListener("touchstart", e => {
-                    LogicGate.MOUSE_WIRE_CONNECTION = ["gate" + (e.changedTouches[0].target.id.split("|")[0]), Number((e.changedTouches[0].target.id.split("|")[2]))];	
+                    LogicGate.MOUSE_WIRE_CONNECTION = {
+                        gateId: Number(e.changedTouches[0].target.id.split("|")[0]),
+                        outputId: Number(e.changedTouches[0].target.id.split("|")[2])
+                    }
                 })
             }
 
@@ -275,41 +322,39 @@ class LogicGate {
         // Create the delete button
         let gateDelete = document.createElement("button");
         gateDelete.innerHTML = '<i data-feather="trash-2"></i>'
-        gateDelete.id = this.gateId + "GateDelete";
+        gateDelete.id = this.gateId + "|Gate_Delete";
 
         // Delete listener
         gateDelete.addEventListener("click", e => {
             if (LogicGate.DRAGGED_GATE != null || LogicGate.DRAGGED_TEXTBOX != null) return;
 
-            let tempGateID = Number(e.target.id.substring(0, e.target.id.length - 10));
-            document.getElementById("logic-gate-holder").removeChild( LogicGate.GATES["gate" + tempGateID.toString()].gateHTMLElement.parentElement );
+            const deletedGateId = Number(e.target.id.split("|")[0]);
+            const deletedGate = LogicGate.getGateFromId(deletedGateId);
             
-            LogicGate.GATES["gate" + tempGateID.toString()].deleteGate();
+            deletedGate.deleteGate();
 
-            for (const gateKey in LogicGate.GATES) {
-                LogicGate.GATES[gateKey].removeConnection("gate" + tempGateID.toString());
-            }
-
-            delete LogicGate.GATES["gate" + tempGateID.toString()];
+            delete LogicGate.GATES["gate" + deletedGateId];
         })
 
         // Show information
         this.gateHTMLElement.addEventListener("contextmenu", e => {
-            let targetGate = e.target.id;
+            const targetGateId = e.target.id;
 
-            if (targetGate in LogicGate.GATES) {
-                LogicGate.GATES[targetGate].deleteButton.style.opacity = 1;
-                LogicGate.GATES[targetGate].deleteButton.style["pointer-events"] = "all";
+            if (targetGateId in LogicGate.GATES) {
+                const gate = LogicGate.getGateFromId(targetGateId);
+
+                gate.deleteButton.style.opacity = 1;
+                gate.deleteButton.style["pointer-events"] = "all";
             }
         })
 
         document.getElementById("background-canvas").addEventListener("mousedown", e => {
+            for (const gateId in LogicGate.GATES) {
+                const gate = LogicGate.getGateFromId(gateId);
 
-            for (const item in LogicGate.GATES) {
-                LogicGate.GATES[item].deleteButton.style.opacity = 0;
-                LogicGate.GATES[item].deleteButton.style["pointer-events"] = "none";
+                gate.deleteButton.style.opacity = 0;
+                gate.deleteButton.style["pointer-events"] = "none";
             }
-
         })
 
         this.deleteButton = gateDelete;
@@ -360,13 +405,14 @@ class LogicGate {
         if (isHigh) this.outputElements[outputId].style.background = "rgb(132, 208, 107)";
 
         // Loop over the forward connections and update each one
-        for (var i = 0; i < this.forwardConnections.length; i++) {
-            let connectionID = this.forwardConnections[i];
+        for (let i = 0; i < this.forwardConnections.length; i++) {
+            const connection = this.forwardConnections[i];
+            // If the forward connection isn't for this output ID then skip
+            if (connection.outputId != outputId) continue;
 
-            if (connectionID.outputID != outputId) continue;
-
-            LogicGate.GATES[connectionID.gateID].inputs[connectionID.inputID] = this.output[outputId];
-            LogicGate.GATES[connectionID.gateID].run();
+            const forwardGate = LogicGate.getGateFromId(connection.gateId);
+            forwardGate.inputs[connection.inputId] = this.output[outputId];
+            forwardGate.run();
         }
     }
 
@@ -374,11 +420,11 @@ class LogicGate {
         return;
     }
 
-    removeConnection(deletedGateID) {
+    removeConnection(gateId) {
         let connectionsToDelete = [];
 
         for (let i = 0; i < this.forwardConnections.length; i++) {
-            if (this.forwardConnections[i].gateID == deletedGateID) connectionsToDelete.push(i);
+            if (this.forwardConnections[i].gateId == gateId) connectionsToDelete.push(i);
         }
         
         let indexFix = 0;
@@ -390,14 +436,15 @@ class LogicGate {
         }
     }
 
-    removeConnectionByID(connectionIndex) {
-        let connectionID = this.forwardConnections[connectionIndex];
+    removeConnectionByID(connectionId) {
+        const connection = this.forwardConnections[connectionId];
+        const gate = LogicGate.getGateFromId(connection.gateId);
 
-        LogicGate.GATES[connectionID.gateID].inputs[connectionID.inputID] = false;
-        LogicGate.GATES[connectionID.gateID].inputTaken[connectionID.inputID] = false;
-        LogicGate.GATES[connectionID.gateID].run();
+        gate.inputs[connection.inputId] = false;
+        gate.inputTaken[connection.inputId] = false;
+        gate.run();
 
-        this.forwardConnections.splice(connectionIndex, 1);
+        this.forwardConnections.splice(connectionId, 1);
     }
 
     toggleGateDescriptions(shouldShow) {
@@ -405,12 +452,22 @@ class LogicGate {
     }
 
     deleteGate() {
+        // Remove the HTML element from the workspace
+        document.getElementById("logic-gate-holder").removeChild(this.gateHTMLElement.parentElement);
+
+        // Disable inputs for connected gates
         for (let i = 0; i < this.maxOutputs; i++) this.runConnections(false, false, i);
 
-        // Open inputs for new gates
+        // Free inputs for new gates
         for (let i = 0; i < this.forwardConnections.length; i++) {
-            let connectionID = this.forwardConnections[i];
-            LogicGate.GATES[connectionID.gateID].inputTaken[connectionID.inputID] = false;
+            const connection = this.forwardConnections[i];
+            const gate = LogicGate.getGateFromId(connection.gateId);
+
+            gate.inputTaken[connection.inputId] = false;
+        }
+
+        for (const gateKey in LogicGate.GATES) {
+            LogicGate.getGateFromId(gateKey).removeConnection(this.gateId);
         }
 
 		this.deleteAudio.currentTime = 0;
@@ -675,8 +732,8 @@ class DecimalInputGate extends LogicGate {
 		infoBox.appendChild(infoBoxInput);
 
 		infoBoxInput.addEventListener("change", e => {
-			let parentGateID = Number(e.target.id.split("|")[0]);
-			LogicGate.GATES["gate" + parentGateID].run(false, { "inputType": "dec" });
+			let parentGateId = Number(e.target.id.split("|")[0]);
+			LogicGate.getGateFromId(parentGateId).run(false, { "inputType": "dec" });
 		})
 
 		let infoBoxBinInput = document.createElement("input");
@@ -686,8 +743,8 @@ class DecimalInputGate extends LogicGate {
 		infoBox.appendChild(infoBoxBinInput);
 
 		infoBoxBinInput.addEventListener("change", e => {
-			let parentGateID = Number(e.target.id.split("|")[0]);
-			LogicGate.GATES["gate" + parentGateID].run(false, { "inputType": "bin" });
+			let parentGateId = Number(e.target.id.split("|")[0]);
+			LogicGate.getGateFromId(parentGateId).run(false, { "inputType": "bin" });
 		})
 
         this.setupIOElements();
@@ -771,8 +828,10 @@ class KeyboardInputGate extends LogicGate {
 		}
 
 		infoBoxKey.addEventListener("change", e => {
-			let keyboardGateID = "gate" + e.target.id.split("|")[0];
-			LogicGate.GATES[keyboardGateID].memory["char"] = LogicGate.GATES[keyboardGateID].infoBox.children[0].value;
+			const keyboardGateId = Number(e.target.id.split("|")[0]);
+            const keyboardGate = LogicGate.getGateFromId(keyboardGateId);
+
+			keyboardGate.memory["char"] = keyboardGate.infoBox.children[0].value;
 		})
 
 		if (setupData) infoBoxKey.value = this.memory["char"] || "A";
@@ -802,8 +861,12 @@ class KeyboardInputGate extends LogicGate {
 
 class DelayGate extends LogicGate {
 
+    delayTime = 1000;
+
     constructor(gateType, position, gateHTMLElement, gateId, setupData) {
         super(gateType, position, gateHTMLElement, gateId, setupData);
+
+        if (setupData) this.delayTime = setupData.delayTime || this.delayTime;
 
         this.maxInputs = 1;
 		this.maxOutputs = 1;
@@ -823,15 +886,15 @@ class DelayGate extends LogicGate {
 
 		let infoBoxDelayVal = document.createElement("input");
 		infoBoxDelayVal.placeholder = "Delay / ms";
-		infoBoxDelayVal.value = 1000;
+		infoBoxDelayVal.value = this.delayTime;
 		infoBoxDelayVal.id = this.gateId + "|gateDelay";
 
 		infoBoxDelayVal.addEventListener("change", e => {
-			let keyboardGateID = "gate" + e.target.id.split("|")[0];
-			LogicGate.GATES[keyboardGateID].memory["delay"] = Number(LogicGate.GATES[keyboardGateID].infoBox.children[0].value) || 1000;
-		})
+            const delayGateId = Number(e.target.id.split("|")[0]);
+            const delayGate = LogicGate.getGateFromId(delayGateId);
 
-		if (setupData) infoBoxDelayVal.value = this.memory["delay"] || 1000;
+			this.delayTime = Number(delayGate.infoBox.children[0].value) || 1000;
+		})
 
 		infoBox.appendChild(infoBoxDelayVal);
 
@@ -843,16 +906,11 @@ class DelayGate extends LogicGate {
     }
 
     run(isPulse=false, data={}) {
-        if (!("delay" in this.memory)) this.memory["delay"] = 1000;
-
-        let gateDelay = this.memory["delay"];
-        this.infoBox.children[0].value = this.memory["delay"];
-
         if (data["delayEnd"]) {
             // Run the delayed inputs
             this.runConnections(data["isHigh"], isPulse);
         } else {
-            let delayWait = setTimeout(this.run, this.memory["delay"], [false, {"delayEnd": true, "isHigh": this.inputs[0]}]);
+            const delayWait = setTimeout(this.run, this.delayTime, [false, {"delayEnd": true, "isHigh": this.inputs[0]}]);
         }
     }
 }
@@ -946,17 +1004,19 @@ class ScreenGate extends LogicGate {
 					// Toggle pixel status
 					let pixelInfo = e.target.id.split("|");
 
-					let pixelGateID = "gate" + pixelInfo[2];
+					let pixelGateId = "gate" + pixelInfo[2];
 					let pixelX = Number(pixelInfo[0]);
 					let pixelY = Number(pixelInfo[1]);
 
-					let pixelStatus = LogicGate.GATES[pixelGateID].memory["pixel_" + pixelX + ","+ pixelY];
+                    const gate = LogicGate.getGateFromId(pixelGateId);
+
+					let pixelStatus = gate.memory["pixel_" + pixelX + ","+ pixelY];
 					pixelStatus = !pixelStatus;
 					
-					LogicGate.GATES[pixelGateID].infoBox.children[0].children[pixelX + (pixelY * ScreenGate.SCREEN_SIZE)].style.background = "rgb(13, 13, 13)";
-					if (pixelStatus) LogicGate.GATES[pixelGateID].infoBox.children[0].children[pixelX + (pixelY * ScreenGate.SCREEN_SIZE)].style.background = "rgb(255, 255, 255)";
+					gate.infoBox.children[0].children[pixelX + (pixelY * ScreenGate.SCREEN_SIZE)].style.background = "rgb(13, 13, 13)";
+					if (pixelStatus) gate.infoBox.children[0].children[pixelX + (pixelY * ScreenGate.SCREEN_SIZE)].style.background = "rgb(255, 255, 255)";
 				
-					LogicGate.GATES[pixelGateID].memory["pixel_" + pixelX + ","+ pixelY] = pixelStatus;
+					gate.memory["pixel_" + pixelX + ","+ pixelY] = pixelStatus;
 				})
 
 				gridChild.appendChild(infoBoxChild);
@@ -1239,8 +1299,8 @@ class RAMGate extends LogicGate {
 		ramDataAddButton.id = this.gateId + "|ramDataAddButton"
 
 		ramDataAddButton.addEventListener("click", e => {
-			let parentGateID = Number(e.target.id.split("|")[0]);
-			LogicGate.GATES["gate" + parentGateID].run(false, { "addData": true });
+			let parentGateId = Number(e.target.id.split("|")[0]);
+			LogicGate.getGateFromId(parentGateId).run(false, { "addData": true });
 		})
 
 		ramEditor.appendChild(ramDataBinary);
@@ -1366,14 +1426,13 @@ class RAMGate extends LogicGate {
             deleteButton.id = this.gateId + "|" + itemKey + "|ramItemDelete";
 
             deleteButton.addEventListener("click", e => {
+                const gateId = Number(e.target.id.split("|")[0]);
+                let ramAddr = e.target.id.split("|")[1];
 
-                let targetID = e.target.id.split("|");
+                const gate = LogicGate.getGateFromId(gateId);
 
-                let clickedGate = Number(targetID[0]);
-                let ramAdressToRemove = targetID[1];
-
-                delete LogicGate.GATES["gate" + clickedGate].memory[ramAdressToRemove];
-                LogicGate.GATES["gate" + clickedGate].run(true);
+                delete gate.memory[ramAddr];
+                gate.run(true);
             })
             
             infoBoxChild.appendChild(itemInfo);

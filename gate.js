@@ -977,10 +977,11 @@ class ScreenGate extends LogicGate {
         super(gateType, position, gateHTMLElement, gateId, setupData);
 
         this.maxInputs = 1 + 3 + 1 + 3 + 1 + 1 + 1 + 1;
-		this.maxOutputs = 0;
+		this.maxOutputs = 1;
 
 		this.inputNames = ["$X", "Bit 1", "Bit 2", "Bit 3", "$Y", "Bit 1", "Bit 2", "Bit 3", "$Clock", "Clock", "$Clear", "Clear"]
-	
+        this.outputNames = ["Pixel"]
+
 		this.gateHTMLElement.style.width = "350px";
 		this.gateHTMLElement.style.minWidth = "350px";
 		this.gateHTMLElement.style.height = "380px";
@@ -1034,23 +1035,23 @@ class ScreenGate extends LogicGate {
 
     run(isPulse=false, data={}) {
         // Update screen inputs
+        let binaryXCoord = [this.inputs[1], this.inputs[2], this.inputs[3]]
+        let binaryYCoord = [this.inputs[5], this.inputs[6], this.inputs[7]]
+
+        let decimalXCoord = 0;
+        let decimalYCoord = 0;
+
+        for (let i = 0; i < 3; i++) {
+            if (binaryXCoord[i]) decimalXCoord += Math.pow(2, i);
+            if (binaryYCoord[i]) decimalYCoord += Math.pow(2, i);
+        }
+
+        this.runConnections(this.memory["pixel_" + decimalXCoord + ","+ decimalYCoord], isPulse)
+        
         if (this.toggleOn == this.inputs[9] && !isPulse) return;
         this.toggleOn = this.inputs[9];
 
-        if (!isPulse) {
-            let binaryXCoord = [this.inputs[1], this.inputs[2], this.inputs[3]]
-            let binaryYCoord = [this.inputs[5], this.inputs[6], this.inputs[7]]
-
-            let decimalXCoord = 0;
-            let decimalYCoord = 0;
-
-            for (let i = 0; i < 3; i++) {
-                if (binaryXCoord[i]) decimalXCoord += Math.pow(2, i);
-                if (binaryYCoord[i]) decimalYCoord += Math.pow(2, i);
-            }
-
-            this.memory["pixel_" + decimalXCoord + ","+ decimalYCoord] = true;
-        }
+        if (!isPulse) this.memory["pixel_" + decimalXCoord + ","+ decimalYCoord] = true;
 
         let clearData = false;
         if (this.inputs[11]) clearData = true;
@@ -1080,8 +1081,8 @@ class ALUGate extends LogicGate {
 	
 		this.gateHTMLElement.style.width = "150px";
 		this.gateHTMLElement.style.minWidth = "150px";
-		this.gateHTMLElement.style.height = "500px";
-		this.gateHTMLElement.style.minHeight = "500px";
+		this.gateHTMLElement.style.height = "760px";
+		this.gateHTMLElement.style.minHeight = "760px";
 
 		// Add an info box
 		let infoBox = document.createElement("div");
